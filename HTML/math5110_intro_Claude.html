@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATH 5110 – Applied Linear Algebra & Matrix Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e; --paper: #f4f1eb; --accent: #1a5276; --accent2: #2980b9;
+    --gold: #b7860b; --gold-light: #f0c040; --muted: #7f8c8d;
+    --node-bg: #dce8f5; --node-border: #2980b9; --arrow: #1a5276;
+    --highlight: #e8f4fd; --claude: #7c3aed; --claude-bg: #ede9fe;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: 'Crimson Pro', Georgia, serif; font-size: 18px; line-height: 1.6; min-height: 100vh; }
+
+  header { background: var(--ink); color: var(--paper); padding: 60px 40px 50px; position: relative; overflow: hidden; }
+  header::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,.03) 40px, rgba(255,255,255,.03) 41px); }
+  .hero-inner { position: relative; max-width: 960px; margin: 0 auto; }
+  .course-tag { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold-light); margin-bottom: 14px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 52px); font-weight: 900; line-height: 1.1; margin-bottom: 10px; }
+  .subtitle { font-size: 18px; color: rgba(244,241,235,.65); font-style: italic; margin-bottom: 28px; }
+  .instructor-card { display: inline-block; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15); border-radius: 6px; padding: 12px 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: rgba(244,241,235,.85); }
+  .instructor-card a { color: var(--gold-light); text-decoration: none; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 50px 24px 80px; }
+
+  .section-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  h2 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--ink); margin-bottom: 18px; border-bottom: 2px solid var(--gold); padding-bottom: 6px; }
+  section { margin-bottom: 56px; }
+
+  .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  .overview-card { background: white; border-radius: 8px; padding: 20px 22px; border-left: 4px solid var(--accent2); box-shadow: 0 2px 8px rgba(0,0,0,.07); font-size: 16px; line-height: 1.6; }
+  @media(max-width:600px){ .overview-grid,.topics-grid{ grid-template-columns:1fr; } }
+
+  /* ── DIAGRAM ── */
+  .diagram-outer { background: white; border-radius: 16px; padding: 28px 20px 20px; box-shadow: 0 4px 24px rgba(0,0,0,.09); margin-top: 12px; overflow-x: auto; }
+  .diagram-caption { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 20px; }
+  .legend { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 16px; padding: 8px 12px; background: #f9f7f2; border-radius: 6px; border: 1px solid #e0ddd6; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+  /* SVG node styles */
+  .n rect   { stroke-width: 1px; }
+  .n text   { font-family: 'Crimson Pro', Georgia, serif; font-size: 12.5px; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .n:hover rect { opacity: .82; cursor: pointer; }
+
+  /* colour families */
+  .c-root rect  { fill: #1a5276; stroke: #0e2e42; }  .c-root text  { fill: #fff; font-weight: 600; }
+  .c-blue rect  { fill: #dce8f5; stroke: #2980b9; }  .c-blue text  { fill: #0d3b5e; }
+  .c-teal rect  { fill: #d5f0e8; stroke: #1a9070; }  .c-teal text  { fill: #0a4030; }
+  .c-purple rect{ fill: #ede9fe; stroke: #7c3aed; }  .c-purple text{ fill: #3b1a8c; font-weight:600; }
+  .c-coral rect { fill: #fde8e0; stroke: #c0552a; }  .c-coral text { fill: #6b2310; }
+  .c-green rect { fill: #e4f5dc; stroke: #3b8c30; }  .c-green text { fill: #1a4512; }
+  .c-amber rect { fill: #fef3d5; stroke: #c08a10; }  .c-amber text { fill: #5c3e00; }
+  .c-gray  rect { fill: #eeece7; stroke: #999;    }  .c-gray  text { fill: #444; font-style: italic; font-size: 11px; }
+
+  /* Topics */
+  .topics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+  .topic-item { display: flex; align-items: flex-start; gap: 10px; background: white; border-radius: 6px; padding: 12px 14px; font-size: 15px; border: 1px solid #e0ddd6; transition: box-shadow .2s, border-color .2s; }
+  .topic-item:hover { box-shadow: 0 2px 10px rgba(0,0,0,.09); border-color: var(--accent2); }
+  .topic-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); font-weight: 500; min-width: 22px; padding-top: 3px; }
+  .topic-text { flex: 1; line-height: 1.5; }
+  .topic-ask { display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--claude); text-decoration: none; border: 1px solid #c4b5fd; border-radius: 4px; padding: 2px 8px; margin-top: 6px; background: var(--claude-bg); white-space: nowrap; transition: background .15s, color .15s; }
+  .topic-ask:hover { background: var(--claude); color: white; }
+  .topic-ask::before { content: '✦'; font-size: 9px; }
+
+  /* Chips */
+  .kw-group { margin-bottom: 22px; }
+  .kw-group-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .kw-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .kw-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--claude-bg); border: 1px solid #c4b5fd; border-radius: 20px; padding: 4px 14px; font-size: 14px; color: var(--claude); text-decoration: none; transition: background .2s, color .2s; white-space: nowrap; }
+  .kw-chip:hover { background: var(--claude); color: white; }
+  .kw-chip::before { content: '✦'; font-size: 10px; }
+
+  .ref-list { list-style: none; }
+  .ref-list li { padding: 10px 0; border-bottom: 1px solid #e0ddd6; font-size: 16px; line-height: 1.5; }
+  .ref-list li:last-child { border-bottom: none; }
+  .ref-list a { color: var(--accent2); text-decoration: none; }
+  .ref-list a:hover { text-decoration: underline; }
+  .ref-em { font-style: italic; }
+
+  .joke-card { background: #fff8e7; border: 1px solid var(--gold); border-radius: 10px; padding: 24px 28px; margin-top: 12px; font-size: 16px; line-height: 1.7; }
+  .joke-card .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .joke-q { font-weight: 600; margin-bottom: 6px; }
+  .joke-a { color: #555; }
+  .claude-link { display: inline-flex; align-items: center; gap: 5px; background: var(--claude-bg); color: var(--claude); border: 1px solid #c4b5fd; border-radius: 4px; padding: 1px 7px; font-family: 'JetBrains Mono', monospace; font-size: 12px; text-decoration: none; transition: background .15s, color .15s; }
+  .claude-link:hover { background: var(--claude); color: white; }
+  .claude-link::before { content: '✦'; font-size: 10px; }
+
+  footer { text-align: center; padding: 30px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); border-top: 1px solid #ddd; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hero-inner">
+    <div class="course-tag">Northeastern University · Department of Mathematics</div>
+    <h1>MATH 5110</h1>
+    <p style="font-family:'Playfair Display',serif;font-size:clamp(16px,3vw,26px);font-weight:300;color:rgba(244,241,235,.9);margin-bottom:10px;">Applied Linear Algebra &amp; Matrix Analysis</p>
+    <p class="subtitle">A graduate-level treatment of theory, computation, and applications</p>
+    <div class="instructor-card">
+      Instructor: He Wang<br>
+      Northeastern University, Dept. of Mathematics<br>
+      <a href="https://hewang.sites.northeastern.edu/" target="_blank">hewang.sites.northeastern.edu</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <section>
+    <div class="section-label">About the Course</div>
+    <h2>Course Overview</h2>
+    <div class="overview-grid">
+      <div class="overview-card"><strong>Rigorous foundations.</strong> Comprehensive treatment of linear algebra concepts and computational techniques, well beyond undergraduate level.</div>
+      <div class="overview-card"><strong>Broad applications.</strong> Covers key applications in CS, statistics, engineering, machine learning, and data analysis.</div>
+      <div class="overview-card"><strong>Audience.</strong> Graduate students in Applied Mathematics, CS, Engineering, and anyone seeking deeper mathematical insight.</div>
+      <div class="overview-card"><strong>Foundation for more.</strong> Solid grounding for advanced study in optimization, spectral methods, signal processing, and ML theory.</div>
+    </div>
+  </section>
+
+  <!-- SINGLE BIG DIAGRAM -->
+  <section>
+    <div class="section-label">Visual Roadmap</div>
+    <h2>Complete Linear Algebra Knowledge Map</h2>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#1a5276;"></div>Root / keystone</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#dce8f5;border:1px solid #2980b9;"></div>Foundations &amp; structure</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#d5f0e8;border:1px solid #1a9070;"></div>Operations &amp; algorithms</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#ede9fe;border:1px solid #7c3aed;"></div>Eigentheory &amp; decompositions</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fde8e0;border:1px solid #c0552a;"></div>Discrete applications</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#e4f5dc;border:1px solid #3b8c30;"></div>Geometry &amp; inner products</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fef3d5;border:1px solid #c08a10;"></div>Data &amp; ML applications</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#eeece7;border:1px solid #999;"></div>Advanced / extra topics</div>
+    </div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:12px;">✦ Click any node to open a Claude explanation in a new tab</p>
+
+    <div class="diagram-outer">
+      <div class="diagram-caption">All topics — flow top to bottom, left branch = discrete applications, right branch = geometry &amp; data</div>
+
+      <!--
+        Layout plan (viewBox 0 0 960 1420):
+        Safe x: 20..940  Safe y: 20..1400
+        Node heights: single-line=38, two-line=52
+        Horizontal center = 480
+
+        ROW 0  y=20   : Linear System (center)
+        ROW 1  y=100  : Matrix Algebra (left) | Vector Spaces (right)
+        ROW 2  y=190  : More Ops (left) | Basis/Dimension (right)
+        ROW 3  y=290  : EIGENVALUES (center, bold)
+        ROW 4  y=370  : Diagonalization / Jordan (center)
+        ROW 5  y=460  : [left fork] Markov/Perron  |  [right fork] Inner Product Space
+        ROW 6  y=550  : PageRank (left)  |  Gram-Schmidt (right-far)  Orth.Proj (right-mid)
+        ROW 7  y=640  : Discrete dyn. (left) | Least Sq (right-left) | FFT (right-mid) | Spectral (right-right)
+        ROW 8  y=730  : SVD / PCA (right center)
+        ROW 9  y=820  : Image Compress | Regression/ML (right)
+        ROW 10 y=920  : Advanced topics row (gray, 4 boxes)
+        ROW 11 y=1010 : More advanced (gray, 4 boxes)
+        ROW 12 y=1100 : Final advanced (gray, 3 boxes)
+      -->
+
+      <svg width="100%" viewBox="0 0 960 1280" xmlns="http://www.w3.org/2000/svg" style="display:block;max-width:960px;margin:0 auto;">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M1 2L8 5L1 8" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- ════ ARROWS (drawn before nodes so nodes sit on top) ════ -->
+
+        <!-- Linear System → Matrix Algebra, Vector Spaces -->
+        <line x1="480" y1="58" x2="310" y2="100" stroke="#2980b9" stroke-width="1.2" marker-end="url(#ah)"/>
+        <line x1="480" y1="58" x2="650" y2="100" stroke="#2980b9" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- bidirectional Matrix ↔ Vector Spaces -->
+        <line x1="420" y1="119" x2="540" y2="119" stroke="#2980b9" stroke-width="1" marker-end="url(#ah)"/>
+        <line x1="540" y1="129" x2="420" y2="129" stroke="#2980b9" stroke-width="1" marker-end="url(#ah)"/>
+        <!-- Matrix Algebra → More Ops -->
+        <line x1="270" y1="142" x2="230" y2="190" stroke="#1a9070" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Vector Spaces → Basis -->
+        <line x1="690" y1="142" x2="730" y2="190" stroke="#1a9070" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- More Ops → Eigenvalues -->
+        <line x1="200" y1="242" x2="380" y2="290" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Basis → Eigenvalues -->
+        <line x1="760" y1="242" x2="580" y2="290" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Eigenvalues → Diagonalization -->
+        <line x1="480" y1="328" x2="480" y2="370" stroke="#7c3aed" stroke-width="1.4" marker-end="url(#ah)"/>
+        <!-- Diagonalization → Markov (left fork) -->
+        <path d="M380 422 L200 460" fill="none" stroke="#c0552a" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Diagonalization → Inner Product (right fork) -->
+        <path d="M580 422 L760 460" fill="none" stroke="#3b8c30" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Markov → PageRank -->
+        <line x1="170" y1="512" x2="155" y2="550" stroke="#c0552a" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Markov → Discrete Dyn -->
+        <line x1="200" y1="512" x2="200" y2="640" stroke="#c0552a" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ah)"/>
+        <!-- Inner Product → Gram-Schmidt -->
+        <line x1="800" y1="512" x2="820" y2="550" stroke="#3b8c30" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Inner Product → Orth Proj -->
+        <line x1="750" y1="512" x2="620" y2="550" stroke="#3b8c30" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Gram-Schmidt → Orth Proj -->
+        <line x1="790" y1="576" x2="690" y2="576" stroke="#3b8c30" stroke-width="1" marker-end="url(#ah)"/>
+        <!-- Orth Proj → Least Squares -->
+        <line x1="580" y1="602" x2="460" y2="640" stroke="#3b8c30" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Orth Proj → FFT -->
+        <line x1="620" y1="602" x2="620" y2="640" stroke="#3b8c30" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Orth Proj → Spectral Decomp -->
+        <line x1="660" y1="602" x2="770" y2="640" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Spectral → SVD/PCA -->
+        <line x1="790" y1="692" x2="700" y2="730" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- Least Squares → SVD (pseudo-inverse connection, dashed) -->
+        <path d="M430 692 L560 730" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ah)"/>
+        <!-- SVD → Image Compression -->
+        <line x1="610" y1="782" x2="540" y2="820" stroke="#c08a10" stroke-width="1.2" marker-end="url(#ah)"/>
+        <!-- SVD → ML/Data -->
+        <line x1="660" y1="782" x2="730" y2="820" stroke="#c08a10" stroke-width="1.2" marker-end="url(#ah)"/>
+
+        <!-- ════ NODES ════ -->
+
+        <!-- ROW 0: Linear System -->
+        <a href="https://claude.ai/new?q=Explain%20linear%20systems%20and%20how%20to%20solve%20them%2C%20including%20matrix%20equations%2C%20row%20reduction%2C%20and%20RREF" target="_blank">
+          <g class="n c-root">
+            <rect x="340" y="20" width="280" height="38" rx="8"/>
+            <text x="480" y="39">Linear system</text>
+          </g>
+        </a>
+
+        <!-- ROW 1: Matrix Algebra | Vector Spaces -->
+        <a href="https://claude.ai/new?q=Explain%20matrix%20algebra%3A%20operations%2C%20inverses%2C%20transpose%2C%20and%20matrix%20multiplication" target="_blank">
+          <g class="n c-blue">
+            <rect x="130" y="100" width="240" height="42" rx="8"/>
+            <text x="250" y="115">Matrix algebra</text>
+            <text x="250" y="131" style="font-size:11px;fill:#3a6a8a;">sum · product · inverse · transpose</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20vector%20spaces%2C%20linear%20transformations%2C%20subspaces%2C%20and%20spanning%20sets" target="_blank">
+          <g class="n c-blue">
+            <rect x="510" y="100" width="280" height="42" rx="8"/>
+            <text x="650" y="115">Vector spaces</text>
+            <text x="650" y="131" style="font-size:11px;fill:#3a6a8a;">sum · scalar product · linear maps</text>
+          </g>
+        </a>
+
+        <!-- ROW 2: More Ops | Basis -->
+        <a href="https://claude.ai/new?q=Explain%20row%20operations%2C%20LU%20factorization%2C%20determinant%2C%20trace%2C%20and%20matrix%20rank" target="_blank">
+          <g class="n c-teal">
+            <rect x="60" y="190" width="270" height="52" rx="8"/>
+            <text x="195" y="209">More matrix operations</text>
+            <text x="195" y="229" style="font-size:11px;fill:#0a4030;">row ops · LU · trace · det · rank</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20basis%2C%20coordinates%2C%20dimension%2C%20and%20the%20rank-nullity%20theorem" target="_blank">
+          <g class="n c-teal">
+            <rect x="620" y="190" width="270" height="52" rx="8"/>
+            <text x="755" y="209">Basis · coordinate · dimension</text>
+            <text x="755" y="229" style="font-size:11px;fill:#0a4030;">rank-nullity · change of basis</text>
+          </g>
+        </a>
+
+        <!-- ROW 3: Eigenvalues (center, bold) -->
+        <a href="https://claude.ai/new?q=Explain%20eigenvalues%2C%20eigenvectors%2C%20eigenspaces%2C%20and%20algebraic%20vs%20geometric%20multiplicity" target="_blank">
+          <g class="n c-purple">
+            <rect x="260" y="290" width="440" height="38" rx="8"/>
+            <text x="480" y="309">Eigenvalues and eigenspaces</text>
+          </g>
+        </a>
+
+        <!-- ROW 4: Diagonalization -->
+        <a href="https://claude.ai/new?q=Explain%20diagonalization%20and%20Jordan%20canonical%20form%2C%20including%20the%20Cayley-Hamilton%20theorem" target="_blank">
+          <g class="n c-purple">
+            <rect x="200" y="370" width="560" height="52" rx="8"/>
+            <text x="480" y="390">Diagonalization · Jordan canonical form</text>
+            <text x="480" y="410" style="font-size:11px;fill:#5b21b6;">algebraic / geometric multiplicity · Cayley–Hamilton</text>
+          </g>
+        </a>
+
+        <!-- ROW 5: Markov (left) | Inner Product Space (right) -->
+        <a href="https://claude.ai/new?q=Explain%20Markov%20chains%2C%20stochastic%20matrices%2C%20dynamical%20systems%2C%20and%20the%20Perron-Frobenius%20theorem" target="_blank">
+          <g class="n c-coral">
+            <rect x="30" y="460" width="280" height="52" rx="8"/>
+            <text x="170" y="479">Markov chains · Perron–Frobenius</text>
+            <text x="170" y="499" style="font-size:11px;fill:#6b2310;">stochastic matrix · dynamical systems</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20inner%20product%20spaces%2C%20norms%2C%20the%20Cauchy-Schwarz%20inequality%2C%20and%20geometric%20intuition" target="_blank">
+          <g class="n c-green">
+            <rect x="610" y="460" width="310" height="52" rx="8"/>
+            <text x="765" y="479">Inner product space</text>
+            <text x="765" y="499" style="font-size:11px;fill:#1a4512;">norm · Cauchy–Schwarz · geometry</text>
+          </g>
+        </a>
+
+        <!-- ROW 6: PageRank (left) | Orth Proj (mid-right) | Gram-Schmidt (far right) -->
+        <a href="https://claude.ai/new?q=How%20does%20Google%20PageRank%20work%20using%20linear%20algebra%20and%20eigenvectors" target="_blank">
+          <g class="n c-coral">
+            <rect x="30" y="550" width="240" height="38" rx="8"/>
+            <text x="150" y="569">Google PageRank algorithm</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20orthogonal%20projection%20and%20orthogonal%20bases%20in%20inner%20product%20spaces" target="_blank">
+          <g class="n c-green">
+            <rect x="490" y="550" width="260" height="52" rx="8"/>
+            <text x="620" y="569">Orthogonal projection</text>
+            <text x="620" y="589" style="font-size:11px;fill:#1a4512;">orthogonal basis</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20the%20Gram-Schmidt%20process%20and%20QR%20factorization%20step%20by%20step" target="_blank">
+          <g class="n c-teal">
+            <rect x="770" y="550" width="160" height="52" rx="8"/>
+            <text x="850" y="569">Gram–Schmidt</text>
+            <text x="850" y="589" style="font-size:11px;fill:#0a4030;">QR factorization</text>
+          </g>
+        </a>
+
+        <!-- ROW 7: Discrete Dyn (left) | Least Sq (mid-left) | FFT (mid) | Spectral (right) -->
+        <a href="https://claude.ai/new?q=Explain%20discrete%20dynamical%20systems%20and%20how%20eigenvalues%20determine%20long-term%20behavior" target="_blank">
+          <g class="n c-coral">
+            <rect x="30" y="640" width="200" height="38" rx="8"/>
+            <text x="130" y="659">Discrete dynamical systems</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20the%20method%20of%20least%20squares%20and%20how%20orthogonal%20projection%20solves%20overdetermined%20systems" target="_blank">
+          <g class="n c-green">
+            <rect x="330" y="640" width="190" height="38" rx="8"/>
+            <text x="425" y="659">General least squares</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20the%20Fast%20Fourier%20Transform%20(FFT)%2C%20Haar%20wavelets%2C%20and%20their%20connection%20to%20orthogonal%20bases" target="_blank">
+          <g class="n c-green">
+            <rect x="540" y="640" width="160" height="38" rx="8"/>
+            <text x="620" y="659">FFT · Haar wavelets</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20spectral%20decomposition%20and%20the%20spectral%20theorem%20for%20symmetric%20matrices" target="_blank">
+          <g class="n c-purple">
+            <rect x="720" y="640" width="200" height="38" rx="8"/>
+            <text x="820" y="659">Spectral decomposition</text>
+          </g>
+        </a>
+
+        <!-- ROW 8: SVD / PCA -->
+        <a href="https://claude.ai/new?q=Explain%20singular%20value%20decomposition%20(SVD)%20and%20principal%20component%20analysis%20(PCA)%20with%20applications" target="_blank">
+          <g class="n c-purple">
+            <rect x="440" y="730" width="380" height="52" rx="8"/>
+            <text x="630" y="749">SVD · PCA</text>
+            <text x="630" y="769" style="font-size:11px;fill:#5b21b6;">singular values · data compression · pseudo-inverse</text>
+          </g>
+        </a>
+
+        <!-- ROW 9: Image Compression | ML / Data Analysis -->
+        <a href="https://claude.ai/new?q=How%20is%20SVD%20used%20for%20image%20compression%3F%20Explain%20with%20an%20example" target="_blank">
+          <g class="n c-amber">
+            <rect x="360" y="820" width="210" height="38" rx="8"/>
+            <text x="465" y="839">Image compression</text>
+          </g>
+        </a>
+        <a href="https://claude.ai/new?q=How%20is%20PCA%20and%20SVD%20used%20in%20machine%20learning%20and%20data%20analysis%3F" target="_blank">
+          <g class="n c-amber">
+            <rect x="590" y="820" width="230" height="38" rx="8"/>
+            <text x="705" y="839">ML · data analysis · regression</text>
+          </g>
+        </a>
+
+        <!-- ════ ADVANCED TOPICS (gray, 4 per row) ════ -->
+        <!-- Divider label -->
+        <text x="480" y="906" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#999" letter-spacing="2">── ADVANCED &amp; EXTRA TOPICS ──</text>
+
+        <!-- ROW A (y=920) -->
+        <a href="https://claude.ai/new?q=Explain%20matrix%20norms%2C%20convergence%20in%20normed%20vector%20spaces%2C%20and%20the%20matrix%20exponential" target="_blank">
+          <g class="n c-gray"><rect x="20"  y="918" width="210" height="38" rx="6"/><text x="125" y="937">Norms · matrix exponential</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20algebraic%20and%20spectral%20graph%20theory%3A%20Laplacian%2C%20connectivity%2C%20graph%20spectra" target="_blank">
+          <g class="n c-gray"><rect x="250" y="918" width="220" height="38" rx="6"/><text x="360" y="937">Spectral graph theory</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20the%20QR%20algorithm%20for%20computing%20eigenvalues%20numerically" target="_blank">
+          <g class="n c-gray"><rect x="490" y="918" width="210" height="38" rx="6"/><text x="595" y="937">QR algorithm</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20linear%20programming%2C%20the%20simplex%20method%2C%20and%20duality" target="_blank">
+          <g class="n c-gray"><rect x="720" y="918" width="210" height="38" rx="6"/><text x="825" y="937">Linear programming</text></g>
+        </a>
+
+        <!-- ROW B (y=978) -->
+        <a href="https://claude.ai/new?q=Explain%20quaternions%20and%20their%20role%20in%20representing%203D%20rotations%2C%20SU(2)%2C%20SO(3)" target="_blank">
+          <g class="n c-gray"><rect x="20"  y="978" width="210" height="38" rx="6"/><text x="125" y="997">Quaternions · rotations</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20exterior%20algebra%2C%20wedge%20products%2C%20and%20multilinear%20algebra" target="_blank">
+          <g class="n c-gray"><rect x="250" y="978" width="220" height="38" rx="6"/><text x="360" y="997">Exterior · tensor algebra</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20matrix%20calculus%2C%20derivatives%20of%20matrix-valued%20functions%2C%20and%20backpropagation" target="_blank">
+          <g class="n c-gray"><rect x="490" y="978" width="210" height="38" rx="6"/><text x="595" y="997">Matrix calculus · backprop</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20affine%20spaces%2C%20affine%20maps%2C%20dual%20norms%2C%20and%20matrix%20inequalities" target="_blank">
+          <g class="n c-gray"><rect x="720" y="978" width="210" height="38" rx="6"/><text x="825" y="997">Affine spaces · dual norms</text></g>
+        </a>
+
+        <!-- ROW C (y=1038) -->
+        <a href="https://claude.ai/new?q=Explain%20Hadamard%20matrices%20and%20their%20combinatorial%20and%20coding-theory%20applications" target="_blank">
+          <g class="n c-gray"><rect x="20"  y="1038" width="210" height="38" rx="6"/><text x="125" y="1057">Hadamard matrices</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20unitary%20and%20orthogonal%20groups%20U(n)%2C%20SU(n)%2C%20O(n)%2C%20SO(n)%20and%20their%20geometry" target="_blank">
+          <g class="n c-gray"><rect x="250" y="1038" width="220" height="38" rx="6"/><text x="360" y="1057">Orthogonal · unitary groups</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=Explain%20the%20chain%20complex%20and%20homology%20from%20linear%20algebra%20and%20topology" target="_blank">
+          <g class="n c-gray"><rect x="490" y="1038" width="210" height="38" rx="6"/><text x="595" y="1057">Chain complex · homology</text></g>
+        </a>
+        <a href="https://claude.ai/new?q=What%20are%20the%20top%2010%20algorithms%20in%20numerical%20linear%20algebra%3F" target="_blank">
+          <g class="n c-gray"><rect x="720" y="1038" width="210" height="38" rx="6"/><text x="825" y="1057">Top 10 algorithms</text></g>
+        </a>
+
+      </svg>
+    </div>
+  </section>
+
+  <!-- MAIN TOPICS -->
+  <section>
+    <div class="section-label">Curriculum</div>
+    <h2>Main Course Topics</h2>
+    <div class="topics-grid">
+      <div class="topic-item">
+        <span class="topic-num">01</span>
+        <div class="topic-text">Linear Systems &amp; Matrix Algebra: solutions, row reduction, RREF, inverses, transpose<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20linear%20systems%20and%20how%20to%20solve%20them%2C%20including%20matrix%20equations%2C%20row%20reduction%2C%20and%20RREF" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">02</span>
+        <div class="topic-text">Linear Spaces: subspaces, basis &amp; dimension, rank-nullity theorem, linear transformations, change of basis<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20linear%20vector%20spaces%2C%20subspaces%2C%20basis%2C%20dimension%2C%20and%20the%20rank-nullity%20theorem" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">03</span>
+        <div class="topic-text">Jordan Normal Forms: determinants, eigenvalues &amp; eigenvectors, diagonalization, Cayley–Hamilton<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20eigenvalues%2C%20eigenvectors%2C%20diagonalization%2C%20and%20Jordan%20normal%20forms%20including%20the%20Cayley-Hamilton%20theorem" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">04</span>
+        <div class="topic-text">Inner Product Spaces: Cauchy–Schwarz, Gram–Schmidt, positive definite, SVD<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20inner%20product%20spaces%2C%20norms%2C%20Cauchy-Schwarz%20inequality%2C%20and%20positive%20definite%20matrices" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">05</span>
+        <div class="topic-text">PCA: covariance matrices, optimal linear combinations, data compression<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20principal%20component%20analysis%20(PCA)%2C%20covariance%20matrices%2C%20and%20SVD-based%20data%20compression" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">06</span>
+        <div class="topic-text">Markov Chains &amp; Perron–Frobenius: stochastic matrices, dynamical systems<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20Markov%20chains%2C%20stochastic%20matrices%2C%20dynamical%20systems%2C%20and%20the%20Perron-Frobenius%20theorem" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">07</span>
+        <div class="topic-text">Fourier Transform &amp; FFT, Haar Wavelets, Hadamard matrices<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20the%20Fourier%20transform%20and%20FFT%2C%20Haar%20wavelets%2C%20and%20Hadamard%20matrices" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">08</span>
+        <div class="topic-text">Norms &amp; Matrix Norms: convergence, matrix exponential e<sup>At</sup><br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20matrix%20norms%2C%20convergence%20in%20normed%20vector%20spaces%2C%20and%20the%20matrix%20exponential%20e%5EAt" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">09</span>
+        <div class="topic-text">Algebraic &amp; Spectral Graph Theory: Laplacian, connectivity, graph spectra<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20algebraic%20and%20spectral%20graph%20theory%3A%20the%20Laplacian%20matrix%2C%20connectivity%2C%20and%20graph%20spectra" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">10</span>
+        <div class="topic-text">QR Algorithm: numerical eigenvalue computation, iterative methods<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20the%20QR%20algorithm%20for%20computing%20eigenvalues%20and%20eigenvectors%20numerically" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">11</span>
+        <div class="topic-text">Quaternions &amp; Rotations: SU(2), SO(3), unitary groups U(n)<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20quaternions%2C%20their%20role%20in%20representing%203D%20rotations%2C%20and%20the%20groups%20SU(2)%20and%20SO(3)" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">12</span>
+        <div class="topic-text">Linear Programming, Matrix Calculus, Neural Networks &amp; Backpropagation<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20linear%20programming%2C%20matrix%20calculus%2C%20and%20their%20connection%20to%20neural%20networks%20and%20backpropagation" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">13</span>
+        <div class="topic-text">Exterior Algebra, Tensor Algebra, Multilinear Algebra<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20exterior%20algebra%2C%20tensor%20algebra%2C%20and%20multilinear%20algebra" target="_blank">Ask Claude to explain</a></div>
+      </div>
+      <div class="topic-item">
+        <span class="topic-num">14</span>
+        <div class="topic-text">Affine Spaces &amp; Affine Maps, Dual Norms, matrix inequalities<br>
+          <a class="topic-ask" href="https://claude.ai/new?q=Explain%20affine%20spaces%2C%20affine%20maps%2C%20dual%20norms%2C%20and%20matrix%20inequalities" target="_blank">Ask Claude to explain</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY CONCEPTS -->
+  <section>
+    <div class="section-label">Quick Reference</div>
+    <h2>Key Concepts — Ask Claude</h2>
+    <div class="kw-group">
+      <div class="kw-group-title">Matrix Factorizations</div>
+      <div class="kw-chips">
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20LU%20decomposition%20and%20how%20it%20is%20used%20to%20solve%20linear%20systems" target="_blank">LU decomposition</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20QR%20decomposition%20and%20the%20Gram-Schmidt%20process" target="_blank">QR decomposition</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20singular%20value%20decomposition%20(SVD)%20with%20geometric%20intuition%20and%20applications" target="_blank">SVD</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20Jordan%20normal%20form%20and%20when%20it%20differs%20from%20diagonalization" target="_blank">Jordan form</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20Schur%20decomposition%20and%20its%20relationship%20to%20eigenvalues" target="_blank">Schur decomposition</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20Cholesky%20decomposition%20and%20when%20it%20applies" target="_blank">Cholesky</a>
+      </div>
+    </div>
+    <div class="kw-group">
+      <div class="kw-group-title">Eigentheory</div>
+      <div class="kw-chips">
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20eigenvalues%20and%20eigenvectors%20with%20geometric%20intuition%20and%20computation" target="_blank">Eigenvalues &amp; Eigenvectors</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20matrix%20diagonalization%3A%20when%20is%20a%20matrix%20diagonalizable%20and%20how" target="_blank">Diagonalization</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20spectral%20theorem%20for%20symmetric%20and%20normal%20matrices" target="_blank">Spectral Theorem</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20Cayley-Hamilton%20theorem%20and%20its%20proof" target="_blank">Cayley–Hamilton</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20characteristic%20polynomial%20and%20how%20it%20relates%20to%20eigenvalues" target="_blank">Characteristic Polynomial</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20minimal%20polynomial%20and%20its%20relationship%20to%20Jordan%20form" target="_blank">Minimal Polynomial</a>
+      </div>
+    </div>
+    <div class="kw-group">
+      <div class="kw-group-title">Geometry &amp; Inner Products</div>
+      <div class="kw-chips">
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20inner%20product%20spaces%3A%20axioms%2C%20geometry%2C%20and%20examples" target="_blank">Inner Product Space</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20Gram-Schmidt%20process%20step%20by%20step%20with%20an%20example" target="_blank">Gram–Schmidt</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20orthogonal%20projection%20in%20linear%20algebra%20with%20geometric%20intuition" target="_blank">Orthogonal Projection</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20Cauchy-Schwarz%20inequality%20and%20its%20proof" target="_blank">Cauchy–Schwarz</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20positive%20definite%20matrices%3A%20definition%2C%20tests%2C%20and%20applications" target="_blank">Positive Definite</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20Hilbert%20spaces%3A%20completeness%2C%20orthonormal%20bases%2C%20and%20key%20theorems" target="_blank">Hilbert Space</a>
+      </div>
+    </div>
+    <div class="kw-group">
+      <div class="kw-group-title">Applications</div>
+      <div class="kw-chips">
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20principal%20component%20analysis%20(PCA)%20from%20scratch%20with%20an%20example" target="_blank">PCA</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20Markov%20chains%3A%20transition%20matrices%2C%20stationary%20distributions%2C%20and%20convergence" target="_blank">Markov Chains</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=How%20does%20Google%20PageRank%20work%20using%20linear%20algebra" target="_blank">Google PageRank</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20method%20of%20least%20squares%20and%20its%20connection%20to%20projection" target="_blank">Least Squares</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20Fast%20Fourier%20Transform%20(FFT)%20and%20why%20it%20is%20so%20fast" target="_blank">FFT</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20support%20vector%20machines%20(SVM)%20and%20the%20role%20of%20linear%20algebra" target="_blank">SVM</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20Perron-Frobenius%20theorem%20and%20its%20applications" target="_blank">Perron–Frobenius</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20backpropagation%20in%20neural%20networks%20using%20matrix%20calculus" target="_blank">Backpropagation</a>
+      </div>
+    </div>
+    <div class="kw-group">
+      <div class="kw-group-title">Advanced Topics</div>
+      <div class="kw-chips">
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20tensors%3A%20what%20they%20are%20and%20how%20they%20generalize%20vectors%20and%20matrices" target="_blank">Tensors</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20exterior%20algebra%20and%20wedge%20products" target="_blank">Exterior Algebra</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20the%20matrix%20exponential%20and%20its%20role%20in%20differential%20equations" target="_blank">Matrix Exponential</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20quaternions%20and%20their%20use%20in%20representing%20rotations%20in%203D" target="_blank">Quaternions</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20spectral%20graph%20theory%3A%20Laplacian%20and%20what%20eigenvalues%20tell%20us%20about%20a%20graph" target="_blank">Spectral Graph Theory</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20linear%20programming%3A%20problem%20formulation%20and%20simplex%20method" target="_blank">Linear Programming</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20dual%20norms%20and%20matrix%20inequalities%20in%20linear%20algebra" target="_blank">Dual Norms</a>
+        <a class="kw-chip" href="https://claude.ai/new?q=Explain%20wavelets%3A%20Haar%20basis%2C%20multiresolution%20analysis%2C%20and%20applications" target="_blank">Wavelets</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- REFERENCES -->
+  <section>
+    <div class="section-label">Bibliography</div>
+    <h2>References &amp; Textbooks</h2>
+    <ul class="ref-list">
+      <li><span class="ref-em">Finite-Dimensional Linear Algebra</span>, Mark S. Gockenbach, CRC Press <em>(primary text)</em></li>
+      <li><span class="ref-em">Linear Algebra and Learning from Data</span>, Gilbert Strang, Wellesley-Cambridge Press — <a href="https://math.mit.edu/~gs/linearalgebra/" target="_blank">mit.edu</a></li>
+      <li><span class="ref-em">Applied Linear Algebra and Matrix Analysis</span>, Thomas S. Shores, Springer</li>
+      <li><span class="ref-em">Applied Linear Algebra</span>, Peter J. Olver &amp; Chehrzad Shakiban, Springer</li>
+      <li><span class="ref-em">A Second Course in Linear Algebra</span>, S.R. Garcia &amp; R.A. Horn, Cambridge University Press</li>
+      <li><span class="ref-em">Matrix Analysis and Applied Linear Algebra</span>, C.D. Meyer, SIAM, 2000</li>
+      <li><span class="ref-em">Advanced Linear Algebra</span>, Steven Roman, GTM, Springer 3rd edition</li>
+      <li><span class="ref-em">Introduction to Applied Linear Algebra</span>, Boyd &amp; Vandenberghe — <a href="https://web.stanford.edu/~boyd/vmls/vmls.pdf" target="_blank">Free PDF (Stanford)</a></li>
+      <li><span class="ref-em">Linear Algebra and Optimization with Applications to Machine Learning</span>, Gallier &amp; Quaintance — <a href="https://www.cis.upenn.edu/~jean/gbooks/linalg.html" target="_blank">Vol. I</a> · <a href="https://www.cis.upenn.edu/~jean/gbooks/geomath.html" target="_blank">Vol. II</a></li>
+      <li>Tao, T. — <a href="https://terrytao.wordpress.com/2019/08/13/eigenvectors-from-eigenvalues/" target="_blank">Eigenvectors from Eigenvalues</a></li>
+    </ul>
+  </section>
+
+  <!-- JOKE -->
+  <section>
+    <div class="section-label">Perspective</div>
+    <h2>A Note on ML Jargon</h2>
+    <div class="joke-card">
+      <div class="label">Jean Gallier Q&amp;A</div>
+      <p class="joke-q">Q: Do support vector machines chase cattle to catch them with some kind of super lasso?</p>
+      <p class="joke-a">A: No. Behind the jargon lies a lot of "classical" linear algebra and techniques from optimization theory — and probability theory and statistics.</p>
+      <p style="margin-top:12px;font-size:15px;color:#666;">Ask Claude:
+        <a class="claude-link" href="https://claude.ai/new?q=Explain%20kernel%20PCA%20and%20the%20kernel%20trick" target="_blank">kernel PCA</a>
+        <a class="claude-link" href="https://claude.ai/new?q=Explain%20ridge%20and%20lasso%20regression" target="_blank">ridge / lasso</a>
+        <a class="claude-link" href="https://claude.ai/new?q=Explain%20support%20vector%20machines%20(SVM)%20and%20the%20role%20of%20linear%20algebra" target="_blank">SVM</a>
+        <a class="claude-link" href="https://claude.ai/new?q=Explain%20Lagrange%20multipliers%20and%20KKT%20conditions" target="_blank">Lagrange / KKT</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>MATH 5110 · Northeastern University · He Wang · ✦ all nodes open Claude explanations</footer>
+
+</body>
+</html>
