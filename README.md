@@ -12,10 +12,10 @@ Linear algebra is one of the central languages of modern applied mathematics, da
 
 In this course, we study both the theoretical foundations and computational tools of linear algebra, with emphasis on applications and mathematical understanding.
 
-## Interactive HTML Pages
+## Interactive HTML Pages 
 
-- [Linear Algebra Interactive Overview](HTML/linear_algebra_interactive_overview.html)
-- [MATH 5110 Intro Interactive Page](HTML/math5110_intro_Claude.html)
+- [Linear Algebra Interactive Overview](https://wanghemath.github.io/MATH5110/HTML/linear_algebra_interactive_overview.html)
+- [MATH 5110 Intro Interactive Page](https://wanghemath.github.io/MATH5110/HTML/math5110_intro_Claude.html)
 
 Topics include:
 
