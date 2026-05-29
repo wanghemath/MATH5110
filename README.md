@@ -2,7 +2,7 @@
 
 Welcome to the course page for **MATH 5110: Applied Linear Algebra and Matrix Analysis**.
 
-This repository contains course materials, lecture notes, homework assignments, computer labs, and supplementary resources for students.
+Lecture Notes as an ebook: [MATH 5110 E-Book](https://wanghemath.github.io/MATH5110Book/)
 
 ---
 
