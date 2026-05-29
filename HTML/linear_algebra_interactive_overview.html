@@ -40,6 +40,9 @@ svg { width:100%; min-width:1060px; height:auto; display:block; }
 .side p { line-height:1.55; color:#28384d; }
 a { color:#0b62b4; }
 .links a { display:inline-block; margin:6px 6px 0 0; padding:7px 10px; border:1px solid #c8d4e3; border-radius:999px; background:#fff; text-decoration:none; font-weight:700; }
+.links a.chatgpt, .keyword a.chatgpt { border-color:#74aa9c; background:#f0fbf7; color:#096b5a; }
+.keyword .linkrow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.keyword .linkrow a { display:inline-block; }
 section { margin-top:28px; }
 section.card { padding:20px; }
 .keyword-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
@@ -55,7 +58,7 @@ section.card { padding:20px; }
 <body>
 <header>
   <h1>Interactive Linear Algebra Knowledge Overview</h1>
-  <p>One integrated diagram for MATH 5110. Click a topic box to see its meaning, course role, and Wikipedia links. Use search to highlight topics such as eigenvalue, PCA, QR, Markov chain, basis, or FFT.</p>
+  <p>One integrated diagram for MATH 5110. Click a topic box to see its meaning, course role, Wikipedia links, and a ChatGPT explanation link. Use search to highlight topics such as eigenvalue, PCA, QR, Markov chain, basis, or FFT.</p>
 </header>
 <main>
   <div class="toolbar">
@@ -71,8 +74,8 @@ section.card { padding:20px; }
     <aside class="card side" id="details">
       <h2>How to use this map</h2>
       <span class="cat">Interactive guide</span>
-      <p>Click any box. The explanation panel will show what the topic means, why it matters in applied linear algebra, and related Wikipedia links.</p>
-      <div class="links"><a href="https://en.wikipedia.org/wiki/Linear_algebra" target="_blank" rel="noopener">Linear algebra</a></div>
+      <p>Click any box. The explanation panel will show what the topic means, why it matters in applied linear algebra, related Wikipedia links, and a ChatGPT explanation link.</p>
+      <div class="links"><a class="chatgpt" href="https://chatgpt.com/?q=Please%20explain%20a%20linear%20algebra%20knowledge%20overview%20for%20a%20graduate%20applied%20linear%20algebra%20course" target="_blank" rel="noopener">ChatGPT overview</a><a href="https://en.wikipedia.org/wiki/Linear_algebra" target="_blank" rel="noopener">Linear algebra</a></div>
     </aside>
   </div>
 
@@ -107,6 +110,10 @@ function wrapText(text, width) {
 }
 function centerBottom(n) { return [n.x+n.w/2, n.y+n.h]; }
 function centerTop(n) { return [n.x+n.w/2, n.y]; }
+function chatGPTUrl(topic) {
+  const prompt = `Please explain ${topic} for a graduate applied linear algebra course. Include the main definition, intuition, important formulas, a small example, and applications.`;
+  return 'https://chatgpt.com/?q=' + encodeURIComponent(prompt);
+}
 function render() {
   const svg = document.getElementById('diagram');
   svg.innerHTML = `<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L8,3 z" fill="var(--blue)" /></marker></defs>`;
@@ -145,8 +152,9 @@ function selectNode(id) {
   document.querySelectorAll('.node').forEach(n=>n.classList.toggle('selected', n.dataset.id===id));
   highlightRelated(id);
   const n = DATA.nodes.find(x=>x.id===id);
-  const links = [[n.label, n.wiki], ...(n.links||[])];
-  document.getElementById('details').innerHTML = `<h2>${n.label}</h2><span class="cat">${n.cat}</span><p>${n.details}</p><div class="links">${links.map(([name,url])=>`<a href="${url}" target="_blank" rel="noopener">${name}</a>`).join('')}</div>`;
+  const links = [[n.label + ' — Wikipedia', n.wiki], ...(n.links||[]).map(([name,url]) => [name + ' — Wikipedia', url])];
+  const chatLink = `<a class="chatgpt" href="${chatGPTUrl(n.label)}" target="_blank" rel="noopener">ChatGPT explanation</a>`;
+  document.getElementById('details').innerHTML = `<h2>${n.label}</h2><span class="cat">${n.cat}</span><p>${n.details}</p><div class="links">${chatLink}${links.map(([name,url])=>`<a href="${url}" target="_blank" rel="noopener">${name}</a>`).join('')}</div>`;
 }
 function highlightRelated(id) {
   const related = new Set([id]);
@@ -167,11 +175,11 @@ function clearDim() {
 }
 function resetView() {
   document.getElementById('search').value=''; selected=null; clearDim();
-  document.getElementById('details').innerHTML = `<h2>How to use this map</h2><span class="cat">Interactive guide</span><p>Click any box. The explanation panel will show what the topic means, why it matters in applied linear algebra, and related Wikipedia links.</p><div class="links"><a href="https://en.wikipedia.org/wiki/Linear_algebra" target="_blank" rel="noopener">Linear algebra</a></div>`;
+  document.getElementById('details').innerHTML = `<h2>How to use this map</h2><span class="cat">Interactive guide</span><p>Click any box. The explanation panel will show what the topic means, why it matters in applied linear algebra, related Wikipedia links, and a ChatGPT explanation link.</p><div class="links"><a class="chatgpt" href="https://chatgpt.com/?q=Please%20explain%20a%20linear%20algebra%20knowledge%20overview%20for%20a%20graduate%20applied%20linear%20algebra%20course" target="_blank" rel="noopener">ChatGPT overview</a><a href="https://en.wikipedia.org/wiki/Linear_algebra" target="_blank" rel="noopener">Linear algebra</a></div>`;
 }
 function renderKeywords() {
   const grid = document.getElementById('keywords');
-  grid.innerHTML = DATA.keywords.map(([name,url,desc]) => `<article class="card keyword"><h3>${name}</h3><p>${desc}</p><a href="${url}" target="_blank" rel="noopener">Wikipedia →</a></article>`).join('');
+  grid.innerHTML = DATA.keywords.map(([name,url,desc]) => `<article class="card keyword"><h3>${name}</h3><p>${desc}</p><div class="linkrow"><a href="${url}" target="_blank" rel="noopener">Wikipedia →</a><a class="chatgpt" href="${chatGPTUrl(name)}" target="_blank" rel="noopener">ChatGPT explanation →</a></div></article>`).join('');
 }
 render();
 </script>
